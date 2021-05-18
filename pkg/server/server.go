@@ -72,7 +72,6 @@ func (s *Server) Start() error {
 		go s.handle(conn)
 	}
 }
-
 func (s *Server) handle(conn net.Conn) {
 	defer func() {
 		err := conn.Close()
@@ -159,7 +158,6 @@ func (s *Server) handle(conn net.Conn) {
 		handler(&req)
 	}
 }
-
 func (s *Server) ratify(path string) (map[string]string, HandleFunc) {
 	routes:= make([]string, len(s.handlers))
 	idx := 0
