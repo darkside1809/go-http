@@ -3,7 +3,6 @@ package server
 import (
 	"net"
 	"net/url"
-	"sync"
 	"strings"
 	"strconv"
 	"io"
@@ -14,20 +13,6 @@ import (
 	// "context"
 	// "math/rand"
 )
-
-type HandleFunc func(req *Request)
-type Server struct {
-	addr		string
-	mu			sync.RWMutex
-	handlers map[string]HandleFunc
-}
-type Request struct {
-	Conn        	net.Conn
-	QueryParams 	url.Values
-	PathParams  	map[string]string
-	Headers     	map[string]string
-	Body        	[]byte
-}
 
 func NewServer(addr string) *Server {
 	return &Server{
@@ -69,10 +54,10 @@ func (s *Server) Start() error {
 			log.Print(err)
 			continue		
 		}
-		go s.handle(conn)
+		go s.Handle(conn)
 	}
 }
-func (s *Server) handle(conn net.Conn) {
+func (s *Server) Handle(conn net.Conn) {
 	defer func() {
 		err := conn.Close()
 		if err != nil {
@@ -149,7 +134,7 @@ func (s *Server) handle(conn net.Conn) {
 			conn.Close()
 		}
 		s.mu.RLock()
-		pathParametres, hr := s.ratify(uri.Path)
+		pathParametres, hr := s.Ratify(uri.Path)
 		if hr != nil {
 			handler = hr
 			req.PathParams = pathParametres
@@ -158,7 +143,7 @@ func (s *Server) handle(conn net.Conn) {
 		handler(&req)
 	}
 }
-func (s *Server) ratify(path string) (map[string]string, HandleFunc) {
+func (s *Server) Ratify(path string) (map[string]string, HandleFunc) {
 	routes:= make([]string, len(s.handlers))
 	idx := 0
 	for k := range s.handlers {
