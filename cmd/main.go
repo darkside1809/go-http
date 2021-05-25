@@ -24,20 +24,17 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-func execute(host, port string) error {
+func execute(host string, port string) (err error) {
 	mux := http.NewServeMux()
-	bannerSvc := banners.NewService()
-
-	sr := app.NewServer(mux, bannerSvc)
-	sr.Init()
-
+	bannersSvc := banners.NewService()
+	server := app.NewServer(mux, bannersSvc)
 	srv := &http.Server{
 		Addr:    net.JoinHostPort(host, port),
-		Handler: sr,
+		Handler: server,
 	}
+	server.Init()
 	return srv.ListenAndServe()
-} 
+}
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.mu.Lock()
 	handler, ok := h.handlers[r.URL.Path]
