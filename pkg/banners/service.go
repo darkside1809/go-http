@@ -9,7 +9,6 @@ import (
 	// "mime/multipart"
 	"strconv"
 	"strings"
-	"sync"
 	"log"
 	"os"
 )
